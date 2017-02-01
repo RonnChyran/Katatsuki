@@ -1,0 +1,96 @@
+﻿<Window x:Class="Katatsuki.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Katatsuki"
+        mc:Ignorable="d"
+        Title="MainWindow" 
+        ResizeMode="NoResize"
+        >
+    <Window.Resources>
+        <CollectionViewSource 
+            x:Key="TracksViewSource" 
+            CollectionViewType="ListCollectionView"
+            Source="{Binding Tracks}"/>
+        <local:StringListConverter x:Key="StringListConverter"/>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <TextBox Grid.Row="0"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                 Text="{Binding TitleQuery}"
+                 />
+        <DataGrid 
+            Grid.Row="1"
+            DataContext="{StaticResource TracksViewSource}"
+            ItemsSource="{Binding}" 
+            
+                  AutoGenerateColumns="False"
+                  x:Name="dataGrid" 
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Path=TrackNumber}" Header="Track" >
+
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=Title}" Header="Title" >
+
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=Album}" Header="Album" >
+
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=Artist}" Header="Artist" >
+
+                </DataGridTextColumn>
+                
+                <DataGridTextColumn Binding="{Binding 
+                        Path=AlbumArtists,
+                        Converter={StaticResource StringListConverter}
+                    }" 
+                    Header="Album Artists">
+
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=FileType}" Header="File Type" >
+
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=Bitrate}" Header="Bitrate" >
+
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=SampleRate}" Header="Sample Rate" >
+
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=BitDepth}" Header="Bit Depth" >
+
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=HasFrontCover}" Header="Contains Cover Art" >
+
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=FrontCoverHeight}" Header="Cover Art Height" >
+
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=FrontCoverWidth}" Header="Cover Art Width" >
+
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=Source}" Header="Source" >
+
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=MusicBrainzReleaseId}" Header="MusicBrainzReleaseId" >
+
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path=FilePath}" Header="Path" >
+
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+      
+    </Grid>
+
+</Window>
