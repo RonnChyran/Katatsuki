@@ -54,6 +54,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="EnumConverter.cs" />
     <Compile Include="KatatsukiContext.cs" />
     <Compile Include="StringListConverter.cs" />
     <Page Include="MainWindow.xaml">

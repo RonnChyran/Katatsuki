@@ -10,6 +10,6 @@ namespace Katatsuki
     public class KatatsukiContext
     {
         public ICollection<Track> Tracks { get; set; }
-        public string TitleQuery { get; set; } 
+        public string Query { get; set; } 
     }
 }

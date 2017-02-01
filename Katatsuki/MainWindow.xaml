@@ -14,6 +14,7 @@
             CollectionViewType="ListCollectionView"
             Source="{Binding Tracks}"/>
         <local:StringListConverter x:Key="StringListConverter"/>
+        <local:EnumConverter x:Key="EnumConverter"/>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -21,15 +22,16 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <TextBox Grid.Row="0"
+                  x:Name="queryBox"
                   HorizontalAlignment="Stretch"
                   VerticalAlignment="Stretch"
-                 Text="{Binding TitleQuery}"
+                  Text="{Binding Query}"
+                  TextChanged="QueryChanged"
                  />
         <DataGrid 
             Grid.Row="1"
             DataContext="{StaticResource TracksViewSource}"
             ItemsSource="{Binding}" 
-            
                   AutoGenerateColumns="False"
                   x:Name="dataGrid" 
                   HorizontalAlignment="Stretch"
@@ -58,18 +60,16 @@
                     Header="Album Artists">
 
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Path=FileType}" Header="File Type" >
+                <DataGridTextColumn Binding="{Binding Path=FileType, Converter={StaticResource EnumConverter}}" Header="File Type">
 
                 </DataGridTextColumn>
                 <DataGridTextColumn Binding="{Binding Path=Bitrate}" Header="Bitrate" >
 
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Path=SampleRate}" Header="Sample Rate" >
+                <DataGridTextColumn Binding="{Binding Path=SampleRate, StringFormat={}{0} Hz}" Header="Sample Rate" >
 
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Path=BitDepth}" Header="Bit Depth" >
 
-                </DataGridTextColumn>
                 <DataGridTextColumn Binding="{Binding Path=HasFrontCover}" Header="Contains Cover Art" >
 
                 </DataGridTextColumn>
@@ -82,7 +82,7 @@
                 <DataGridTextColumn Binding="{Binding Path=Source}" Header="Source" >
 
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Path=MusicBrainzReleaseId}" Header="MusicBrainzReleaseId" >
+                <DataGridTextColumn Binding="{Binding Path=MusicBrainzTrackId}" Header="MusicBrainz Track ID" >
 
                 </DataGridTextColumn>
                 <DataGridTextColumn Binding="{Binding Path=FilePath}" Header="Path" >
