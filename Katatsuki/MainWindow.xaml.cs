@@ -27,19 +27,22 @@ namespace Katatsuki
         private readonly TrackboxListener watcher;
         private readonly KatatsukiContext context;
         private readonly CollectionViewSource viewSource;
+        private readonly TrackQueryProcessor query;
         public MainWindow()
         {
             this.InitializeComponent();
             this.context = new KatatsukiContext();
-
+            this.query = new TrackQueryProcessor();
             this.context.Tracks = new ObservableCollection<Track>();
             this.viewSource = (CollectionViewSource)(this.FindResource("TracksViewSource"));
-         //   tracksViewSource.Source = this.Tracks;
-            this.watcher = new TrackboxListener(@"D:\\Automatically Add to My Library\");
+            //   tracksViewSource.Source = this.Tracks;
+            //this.watcher = new TrackboxListener(@"G:\\Automatically Add to My Library\");
+            this.watcher = new TrackboxListener(@"I:\\iTunes\\iTunes Media\\Music\\");
             this.watcher.NewTrackFound += (s, e) =>
             {
                 this.Dispatcher.Invoke(() => this.context.Tracks.Add(e.Track));
             };
+           
             this.DataContext = context;
             this.viewSource.Filter += TracksViewSource_Filter;
             this.watcher.InitAsync();
@@ -68,85 +71,10 @@ namespace Katatsuki
             if (query == String.Empty)
             {
                 return true;
-            }else if(query.StartsWith("!")) {
-                var commands = query.Split('!'); //todo smarter split 
-                foreach(string command in commands)
-                {
-                    var predicate = command.Split(new[] { ':' }, 2);
-                    if (predicate.Length < 2) continue;
-                    string cmd = predicate[0];
-                    string param = predicate[1];
-                    if (param == String.Empty) continue;
-                    switch (cmd) {
-                        case "q":
-                            return QueryFullText(track, param);
-                        case "Q":
-                            return QueryExactText(track, param);
-                        case "al":
-                            return track.Album.Contains(param);
-                        case "AL":
-                            return track.Album.Equals(param, StringComparison.InvariantCultureIgnoreCase);
-                        case "a":
-                            return track.Artist.Contains(param);
-                        case "A":
-                            return track.Artist.Equals(param, StringComparison.InvariantCultureIgnoreCase);
-                        case "ala":
-                            return (from artist in track.AlbumArtists where artist.Contains(param, StringComparison.InvariantCultureIgnoreCase) select artist).Any();
-                        case "ALA":
-                            return (from artist in track.AlbumArtists where artist.Equals(param, StringComparison.InvariantCultureIgnoreCase) select artist).Any();
-                        case "f":
-                            if (param.Equals("mp3", StringComparison.InvariantCultureIgnoreCase))
-                                return track.FileType == TrackFileType.MP3_CBR
-                                    || track.FileType == TrackFileType.MP3_VBR;
-                            if (param.Equals("flac", StringComparison.InvariantCultureIgnoreCase))
-                                return track.FileType == TrackFileType.FLAC
-                                    || track.FileType == TrackFileType.FLAC_4
-                                    || track.FileType == TrackFileType.FLAC_8
-                                    || track.FileType == TrackFileType.FLAC_16
-                                    || track.FileType == TrackFileType.FLAC_24
-                                    || track.FileType == TrackFileType.FLAC_32;
-                            if (param.Equals("alac", StringComparison.InvariantCultureIgnoreCase))
-                                return track.FileType == TrackFileType.ALAC;
-                            if(param.Equals("aac", StringComparison.InvariantCultureIgnoreCase) 
-                                || param.Equals("mp4", StringComparison.InvariantCultureIgnoreCase))
-                                return track.FileType == TrackFileType.AAC;
-                            if (param.Equals("flac4", StringComparison.InvariantCultureIgnoreCase))
-                                return track.FileType == TrackFileType.FLAC_4;
-                            if (param.Equals("flac8", StringComparison.InvariantCultureIgnoreCase))
-                                return track.FileType == TrackFileType.FLAC_8;
-                            if (param.Equals("flac16", StringComparison.InvariantCultureIgnoreCase))
-                                return track.FileType == TrackFileType.FLAC_16;
-                            if (param.Equals("flac24", StringComparison.InvariantCultureIgnoreCase))
-                                return track.FileType == TrackFileType.FLAC_24;
-                            if (param.Equals("flac32", StringComparison.InvariantCultureIgnoreCase))
-                                return track.FileType == TrackFileType.FLAC_32;
-                            return track.FileType == TrackFileType.UNKNOWN;
-                        case "sr":
-                            Int32.TryParse(param, out int sr);
-                            return track.SampleRate.Equals(sr);
-                        case "br":
-                            Int32.TryParse(param, out int br);
-                            return track.Bitrate.Equals(br);
-                        case "chlt":
-                            Int32.TryParse(param, out int chlt);
-                            return track.FrontCoverHeight <= chlt;
-                        case "chgt":
-                            Int32.TryParse(param, out int chgt);
-                            return track.FrontCoverHeight >= Convert.ToInt32(chgt);
-                        case "cwlt":
-                            Int32.TryParse(param, out int cwlt);
-                            return track.FrontCoverWidth <= cwlt;
-                        case "cwgt":
-                            Int32.TryParse(param, out int cwgt);
-                            return track.FrontCoverWidth >= cwgt;
-                        case "c":
-                            Boolean.TryParse(param, out bool c);
-                            return track.HasFrontCover == c;
-                        default:
-                            return false;
-                    }
-                }
-                return false;
+            }
+            else if(query.StartsWith("!")) {
+                var commands = TrackQuery.BuildQuerySet(query);
+                return this.query.ProcessQuery(track, commands);
             }
             else if(query.StartsWith(@"""") && query.EndsWith(@"""") && query.Length > 2)
             {
@@ -175,12 +103,6 @@ namespace Katatsuki
                    || (from artist in track.AlbumArtists where artist.Equals(exactQuery, StringComparison.InvariantCultureIgnoreCase) select artist).Any());
         }
     }
-    public static class StringExtensions
-    {
-        public static bool Contains(this string source, string toCheck, StringComparison comp)
-        {
-            return source.IndexOf(toCheck, comp) >= 0;
-        }
-    }
+   
 
 }

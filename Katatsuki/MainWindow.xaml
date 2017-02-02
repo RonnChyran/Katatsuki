@@ -18,16 +18,34 @@
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="25"/>
+            <RowDefinition Height="75"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <TextBox Grid.Row="0"
+        <Grid Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <TextBox Grid.Row="0"
                   x:Name="queryBox"
                   HorizontalAlignment="Stretch"
                   VerticalAlignment="Stretch"
                   Text="{Binding Query}"
-                  TextChanged="QueryChanged"
-                 />
+                  TextChanged="QueryChanged"/>
+            <TextBlock Grid.Row="1" TextWrapping="WrapWithOverflow">
+                !q &amp; !Q - Full Text Search,
+                !al &amp; !AL - Album,
+                !ala &amp; !ALA - Album Artists,
+                !f - Format (flac, mp3, alac, aac, flac[br], cbr, vbr),
+                !sr - Sample Rate
+               
+                !br[lt|gt] - Bitrate
+                !c(w|h)(lt|gt) - Cover Art Dimentions
+                !c:{true|false} - Has Cover Art
+                !mb:{true|false} - Has MusicBrainz tags
+            </TextBlock>
+        </Grid>
+       
         <DataGrid 
             Grid.Row="1"
             DataContext="{StaticResource TracksViewSource}"

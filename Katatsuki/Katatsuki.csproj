@@ -57,6 +57,9 @@
     <Compile Include="EnumConverter.cs" />
     <Compile Include="KatatsukiContext.cs" />
     <Compile Include="StringListConverter.cs" />
+    <Compile Include="TrackQuery.cs" />
+    <Compile Include="TrackQueryCombinator.cs" />
+    <Compile Include="TrackQueryProcessor.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

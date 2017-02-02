@@ -44,6 +44,7 @@ namespace Katatsuki.API
             this.watcher.Created += OnTrackCreatedAsync;
         }
 
+
         private async void OnTrackCreatedAsync(object sender, FileSystemEventArgs e)
         {
             if (e.FullPath.Split(Path.DirectorySeparatorChar).Contains("Not Added")) return;
