@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Katatsuki"
         mc:Ignorable="d"
         Title="MainWindow" 
-        ResizeMode="NoResize"
+        ResizeMode="CanResize"
         >
     <Window.Resources>
         <CollectionViewSource 

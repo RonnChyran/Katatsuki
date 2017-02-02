@@ -17,9 +17,9 @@ namespace Katatsuki
             {
                 { "q", QueryFullText },
                 {"Q", QueryExactText },
-                {"a", (track, param) => track.Artist.Contains(param) },
+                {"a", (track, param) => track.Artist.Contains(param, StringComparison.InvariantCultureIgnoreCase) },
                 {"A", (track, param) => track.Artist.Equals(param, StringComparison.InvariantCultureIgnoreCase)},
-                {"al", (track, param) => track.Album.Contains(param) },
+                {"al", (track, param) => track.Album.Contains(param, StringComparison.InvariantCultureIgnoreCase) },
                 {"AL", (track, param) => track.Album.Equals(param, StringComparison.InvariantCultureIgnoreCase)},
                 {"ala", (track, param) => (from artist in track.AlbumArtists where artist.Contains(param, StringComparison.InvariantCultureIgnoreCase) select artist).Any() },
                 { "ALA", (track, param) => (from artist in track.AlbumArtists where artist.Equals(param, StringComparison.InvariantCultureIgnoreCase) select artist).Any() },
@@ -67,12 +67,12 @@ namespace Katatsuki
                 {"brlt", (track, param) =>
                 {
                     Int32.TryParse(param, out int i);
-                    return track.Bitrate <= i;
+                    return track.Bitrate < i;
                 }},
                 {"brgt", (track, param) =>
                 {
                     Int32.TryParse(param, out int i);
-                    return track.Bitrate >= i;
+                    return track.Bitrate > i;
                 }},
                 {"chlt", (track, param) =>
                 {
