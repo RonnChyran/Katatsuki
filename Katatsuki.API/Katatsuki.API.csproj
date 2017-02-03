@@ -59,13 +59,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SqliteDatabase.cs" />
+    <Compile Include="Library.cs" />
     <Compile Include="Track.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TrackboxCorruptedEventArgs.cs" />
     <Compile Include="TrackboxMassEventArgs.cs" />
     <Compile Include="TrackboxEventArgs.cs" />
     <Compile Include="TrackboxListener.cs" />
-    <Compile Include="TrackDatabase.cs" />
     <Compile Include="TrackFileTypes.cs" />
   </ItemGroup>
   <ItemGroup>

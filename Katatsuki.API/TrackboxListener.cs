@@ -12,23 +12,23 @@ namespace Katatsuki.API
         public DirectoryInfo TrackboxPath { get; }
         private static readonly string[] FileMasks = new string[] {".flac", ".mp3", ".m4a" };
         public event EventHandler<TrackboxEventArgs> NewTrackFound;
+        public event EventHandler<TrackboxCorruptedEventArgs> CorruptedTrackFound;
         private FileSystemWatcher watcher;
         const int FileCopyAttempts = 100;
         public TrackboxListener(string trackboxPath)
         {
             this.TrackboxPath = new DirectoryInfo(Path.GetFullPath(trackboxPath));
-            
         }
 
         public async Task InitAsync()
         {
             foreach(string file in 
-                from file in 
-                Directory.EnumerateFiles(this.TrackboxPath.FullName,"*.*", SearchOption.AllDirectories)
-                where TrackboxListener.FileMasks.Contains(Path.GetExtension(file))
-                select file)
+                (from file in 
+                Directory.EnumerateFiles(this.TrackboxPath.FullName,"*.*", SearchOption.AllDirectories).AsParallel()
+                 where TrackboxListener.FileMasks.Contains(Path.GetExtension(file))
+                select file))
             {
-                await TrackCreatedAsync(file);
+                 await TrackCreatedAsync(file);
             }
             this.watcher = new FileSystemWatcher(this.TrackboxPath.FullName)
             {
@@ -39,7 +39,8 @@ namespace Katatsuki.API
                             NotifyFilters.LastAccess |
                             NotifyFilters.LastWrite |
                             NotifyFilters.Size |
-                            NotifyFilters.Security
+                            NotifyFilters.Security,
+                IncludeSubdirectories = true
             };
             this.watcher.Created += OnTrackCreatedAsync;
         }
@@ -47,8 +48,7 @@ namespace Katatsuki.API
 
         private async void OnTrackCreatedAsync(object sender, FileSystemEventArgs e)
         {
-            if (e.FullPath.Split(Path.DirectorySeparatorChar).Contains("Not Added")) return;
-            if (!TrackboxListener.FileMasks.Contains(Path.GetExtension(e.FullPath))) return;
+           
             await Task.Run(async () =>
             {
                 await TrackCreatedAsync(e.FullPath);
@@ -57,10 +57,25 @@ namespace Katatsuki.API
 
         private async Task TrackCreatedAsync(string path)
         {
+            if ((from directory in
+                    path.Split(Path.DirectorySeparatorChar)
+                 where directory.StartsWith(".")
+                 select directory).Any()) return;
+            if (!TrackboxListener.FileMasks.Contains(Path.GetExtension(path)))
+            {
+                this.CorruptedTrackFound?.Invoke(this, new TrackboxCorruptedEventArgs(path));
+                return;
+            }
             if (await GetIdleFileAsync(path))
             {
-                this.NewTrackFound?.Invoke(this,
-                    new TrackboxEventArgs(new Track(path, this.GetCategory(path))));
+                try
+                {
+                    this.NewTrackFound?.Invoke(this,
+                        new TrackboxEventArgs(new Track(path, this.GetCategory(path))));
+                }catch(TagLib.CorruptFileException)
+                {
+                    this.CorruptedTrackFound?.Invoke(this, new TrackboxCorruptedEventArgs(path));
+                }
             }
         }
 

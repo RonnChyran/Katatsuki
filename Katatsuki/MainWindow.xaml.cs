@@ -15,6 +15,8 @@ using Katatsuki.API;
 using System.IO;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Collections.Concurrent;
 
 namespace Katatsuki
 {
@@ -33,14 +35,46 @@ namespace Katatsuki
             this.InitializeComponent();
             this.context = new KatatsukiContext();
             this.query = new TrackQueryProcessor();
-            this.context.Tracks = new ObservableCollection<Track>();
+            var library = new Library(@"G:\Katatsuki\");
             this.viewSource = (CollectionViewSource)(this.FindResource("TracksViewSource"));
             //   tracksViewSource.Source = this.Tracks;
-            //this.watcher = new TrackboxListener(@"G:\\Automatically Add to My Library\");
-            this.watcher = new TrackboxListener(@"I:\\iTunes\\iTunes Media\\Music\\");
+            this.watcher = new TrackboxListener(@"G:\\Automatically Add to My Library\");
+            //this.watcher = new TrackboxListener(@"G:\Project Reboot\");
+            //this.watcher = new TrackboxListener(@"I:\\iTunes\\iTunes Media\\Music\\");
+            if (!Directory.Exists(Path.Combine(this.watcher.TrackboxPath.FullName, ".notadded")))
+                Directory.CreateDirectory(Path.Combine(this.watcher.TrackboxPath.FullName, ".notadded"));
+
             this.watcher.NewTrackFound += (s, e) =>
             {
-                this.Dispatcher.Invoke(() => this.context.Tracks.Add(e.Track));
+                //if(!this.context.Tracks.Contains(e.Track)) this.context.Add(e.Track);
+                try
+                {
+                    library.Add(e.Track);
+                }
+                catch
+                {
+                    try
+                    {
+                        File.Move(e.Track.FilePath, this.ContainsFilePath(Path.Combine(this.watcher.TrackboxPath.FullName, ".notadded", Path.GetFileName(e.Track.FilePath))));
+                    }
+                    catch
+                    {
+                        return;
+                    }
+                }
+            };
+
+            this.watcher.CorruptedTrackFound += (s, e) =>
+            {
+                try
+                {
+                    File.Move(e.Path, this.ContainsFilePath(Path.Combine(this.watcher.TrackboxPath.FullName, ".notadded", Path.GetFileName(e.Path))));
+                }
+                catch
+                {
+                    return;
+                }
+
             };
            
             this.DataContext = context;
@@ -49,6 +83,15 @@ namespace Katatsuki
 
         }
 
+        public string ContainsFilePath(string path, int iterations = 0)
+        {
+            string extension = Path.GetExtension(path);
+            string destination = Path.GetDirectoryName(path);
+            string newFilename = $"{Path.GetFileNameWithoutExtension(path)}{(iterations > 0 ? $" ({iterations})" : "")}{extension}";
+            if (File.Exists(Path.Combine(destination, newFilename))) return this.ContainsFilePath(path, ++iterations);
+            return Path.Combine(destination, newFilename);
+
+        }
         private void TracksViewSource_Filter(object sender, FilterEventArgs e)
         {
             e.Accepted = QueryFilter((Track)e.Item);
@@ -92,6 +135,7 @@ namespace Katatsuki
             return (track.Title.Contains(query, StringComparison.InvariantCultureIgnoreCase)
                     || track.Album.Contains(query, StringComparison.InvariantCultureIgnoreCase)
                     || track.Artist.Contains(query, StringComparison.InvariantCultureIgnoreCase)
+                    || track.FilePath.Contains(query, StringComparison.InvariantCultureIgnoreCase)
                     || (from artist in track.AlbumArtists where artist.Contains(query, StringComparison.InvariantCultureIgnoreCase) select artist).Any());
         }
 
@@ -100,7 +144,14 @@ namespace Katatsuki
             return (track.Title.Equals(exactQuery, StringComparison.InvariantCultureIgnoreCase)
                    || track.Album.Equals(exactQuery, StringComparison.InvariantCultureIgnoreCase)
                    || track.Artist.Equals(exactQuery, StringComparison.InvariantCultureIgnoreCase)
+                   || track.FilePath.Equals(exactQuery, StringComparison.InvariantCultureIgnoreCase)
                    || (from artist in track.AlbumArtists where artist.Equals(exactQuery, StringComparison.InvariantCultureIgnoreCase) select artist).Any());
+        }
+
+        private void dataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            string path = Path.GetDirectoryName(((Track)this.dataGrid.SelectedItem)?.FilePath);
+            if(path != null) Process.Start(path);
         }
     }
    

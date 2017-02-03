@@ -3,16 +3,24 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         xmlns:local="clr-namespace:Katatsuki"
         mc:Ignorable="d"
         Title="MainWindow" 
         ResizeMode="CanResize"
+        
         >
     <Window.Resources>
         <CollectionViewSource 
             x:Key="TracksViewSource" 
             CollectionViewType="ListCollectionView"
-            Source="{Binding Tracks}"/>
+            IsLiveFilteringRequested="True"
+            Source="{Binding Tracks}">
+            <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="Album" />
+                <scm:SortDescription PropertyName="TrackNumber" />
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
         <local:StringListConverter x:Key="StringListConverter"/>
         <local:EnumConverter x:Key="EnumConverter"/>
     </Window.Resources>
@@ -45,9 +53,13 @@
                 !mb:{true|false} - Has MusicBrainz tags
             </TextBlock>
         </Grid>
-       
-        <DataGrid 
-            Grid.Row="1"
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="20"/>
+            </Grid.RowDefinitions>
+            <DataGrid 
+            Grid.Row="0"
             DataContext="{StaticResource TracksViewSource}"
             ItemsSource="{Binding}" 
                   AutoGenerateColumns="False"
@@ -56,59 +68,79 @@
                   VerticalAlignment="Stretch"
                   CanUserAddRows="False"
                   CanUserDeleteRows="False"
-                  IsReadOnly="True">
-            <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding Path=TrackNumber}" Header="Track" >
+                  CanUserResizeRows="False"
+                  IsReadOnly="True"
+                EnableRowVirtualization="True"
+                EnableColumnVirtualization="True"
+                VirtualizingPanel.VirtualizationMode="Standard"
+                VirtualizingPanel.IsVirtualizing="True"
+                VirtualizingPanel.IsVirtualizingWhenGrouping="True"
 
-                </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Path=Title}" Header="Title" >
+                HeadersVisibility="Column"
+            MouseDoubleClick="dataGrid_MouseDoubleClick">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Binding="{Binding Path=TrackNumber}"
+                                    Header="Track" CanUserSort="False" CanUserResize="False">
 
-                </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Path=Album}" Header="Album" >
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Path=Title}" Header="Title" >
 
-                </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Path=Artist}" Header="Artist" >
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Path=Album}" Header="Album" >
 
-                </DataGridTextColumn>
-                
-                <DataGridTextColumn Binding="{Binding 
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Path=Artist}" Header="Artist" >
+
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Binding="{Binding 
                         Path=AlbumArtists,
                         Converter={StaticResource StringListConverter}
+                    
                     }" 
+                    CanUserSort="False"
                     Header="Album Artists">
 
-                </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Path=FileType, Converter={StaticResource EnumConverter}}" Header="File Type">
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Path=FileType, Converter={StaticResource EnumConverter}}" Header="File Type">
 
-                </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Path=Bitrate}" Header="Bitrate" >
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Path=Bitrate}" Header="Bitrate">
 
-                </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Path=SampleRate, StringFormat={}{0} Hz}" Header="Sample Rate" >
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Path=SampleRate, StringFormat={}{0} Hz}" Header="Sample Rate" >
 
-                </DataGridTextColumn>
+                    </DataGridTextColumn>
 
-                <DataGridTextColumn Binding="{Binding Path=HasFrontCover}" Header="Contains Cover Art" >
+                    <DataGridTextColumn Binding="{Binding Path=HasFrontCover}" Header="Contains Cover Art" >
 
-                </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Path=FrontCoverHeight}" Header="Cover Art Height" >
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Path=FrontCoverHeight}" Header="Cover Art Height" >
 
-                </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Path=FrontCoverWidth}" Header="Cover Art Width" >
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Path=FrontCoverWidth}" Header="Cover Art Width" >
 
-                </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Path=Source}" Header="Source" >
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Path=Source}" Header="Source" >
 
-                </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Path=MusicBrainzTrackId}" Header="MusicBrainz Track ID" >
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Path=MusicBrainzTrackId}" Header="MusicBrainz Track ID" >
 
-                </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Path=FilePath}" Header="Path" >
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Path=FilePath}" Header="Path" >
 
-                </DataGridTextColumn>
-            </DataGrid.Columns>
-        </DataGrid>
-      
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+            <StatusBar Grid.Row="2">
+                <StatusBarItem x:Name="trackCount" Content="{Binding ElementName=dataGrid, Path=ItemsSource.Count}"
+                               ContentStringFormat="{}{0} Tracks">
+                </StatusBarItem>
+                <StatusBarItem x:Name="trackSelectedCount" Content="{Binding ElementName=dataGrid, Path=SelectedItems.Count}"
+                               ContentStringFormat="{}{0} Selected">
+                </StatusBarItem>
+            </StatusBar>
+        </Grid>
     </Grid>
 
 </Window>
