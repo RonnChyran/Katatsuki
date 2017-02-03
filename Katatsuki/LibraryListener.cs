@@ -28,24 +28,26 @@ namespace Katatsuki
             var timer = new System.Timers.Timer(10000);
             timer.AutoReset = true;
             //todo use an autoreset event
-            timer.Elapsed += (s, e) =>
-            {
-                if (this.RecentTracks.IsEmpty) return;
-                if(this.RecentTracks.Count > 1)
-                {
-                    this.RecentTracks.TryPop(out Track t);
-                    this.icon.ShowBalloonTip(1000, "New Tracks Added", 
-                        $"Added {t?.Artist} - {t?.Title} and {this.RecentTracks.Count} other tracks.", ToolTipIcon.Info);
-                    this.RecentTracks.Clear();
-                }
-                if(this.RecentTracks.Count == 1)
-                {
-                    this.RecentTracks.TryPop(out Track t);
-                    this.icon.ShowBalloonTip(1000, "New Track Added", 
-                        $"Found {t?.Artist} - {t?.Title}", ToolTipIcon.Info);
-                }
-            };
+            timer.Elapsed += Timer_Elapsed;
             timer.Start();
+        }
+
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            if (this.RecentTracks.IsEmpty) return;
+            if (this.RecentTracks.Count > 1)
+            {
+                this.RecentTracks.TryPop(out Track t);
+                this.icon.ShowBalloonTip(1000, "New Tracks Added",
+                    $"Added {t?.Artist} - {t?.Title} and {this.RecentTracks.Count} other tracks.", ToolTipIcon.Info);
+                this.RecentTracks.Clear();
+            }
+            if (this.RecentTracks.Count == 1)
+            {
+                this.RecentTracks.TryPop(out Track t);
+                this.icon.ShowBalloonTip(1000, "New Track Added",
+                    $"Found {t?.Artist} - {t?.Title}", ToolTipIcon.Info);
+            }
         }
 
         private void MoveToNotAdded(string path)
