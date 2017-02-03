@@ -15,6 +15,7 @@ namespace Katatsuki.API
         public event EventHandler<TrackboxCorruptedEventArgs> CorruptedTrackFound;
         private FileSystemWatcher watcher;
         const int FileCopyAttempts = 100;
+
         public TrackboxListener(string trackboxPath)
         {
             this.TrackboxPath = new DirectoryInfo(Path.GetFullPath(trackboxPath));

@@ -19,6 +19,9 @@ namespace Katatsuki
         private ObservableCollection<Track> tracks;
         private SynchronizationContext uiContext;
         private LiteCollection<Track> tracksCache;
+        public TrackboxListener Watcher { get; }
+        public Library TrackLibrary { get; }
+
         public KatatsukiContext()
         {
             if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"katatsuki")))
@@ -30,6 +33,13 @@ namespace Katatsuki
             this.tracks = new ObservableCollection<Track>(tracksCache.FindAll());
             this.Tracks = new ReadOnlyObservableCollection<Track>(this.tracks);
             this.uiContext = SynchronizationContext.Current;
+
+            this.TrackLibrary = new Library(@"G:\Katatsuki\");
+            this.Watcher = new TrackboxListener(@"G:\\Automatically Add to My Library\");
+
+            if (!Directory.Exists(Path.Combine(this.Watcher.TrackboxPath.FullName, ".notadded")))
+                Directory.CreateDirectory(Path.Combine(this.Watcher.TrackboxPath.FullName, ".notadded"));
+            this.Watcher.InitAsync();
 
         }
 

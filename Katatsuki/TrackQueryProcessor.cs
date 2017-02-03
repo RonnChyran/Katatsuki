@@ -135,7 +135,7 @@ namespace Katatsuki
             return match;
         }
 
-        private bool QueryFullText(Track track, string query)
+        public bool QueryFullText(Track track, string query)
         {
             return (track.Title.Contains(query, StringComparison.InvariantCultureIgnoreCase)
                     || track.Album.Contains(query, StringComparison.InvariantCultureIgnoreCase)
@@ -143,7 +143,7 @@ namespace Katatsuki
                     || (from artist in track.AlbumArtists where artist.Contains(query, StringComparison.InvariantCultureIgnoreCase) select artist).Any());
         }
 
-        private bool QueryExactText(Track track, string exactQuery)
+        public bool QueryExactText(Track track, string exactQuery)
         {
             return (track.Title.Equals(exactQuery, StringComparison.InvariantCultureIgnoreCase)
                    || track.Album.Equals(exactQuery, StringComparison.InvariantCultureIgnoreCase)
