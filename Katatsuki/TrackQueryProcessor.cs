@@ -11,10 +11,11 @@ namespace Katatsuki
     {
         private IDictionary<string, Func<Track, string, bool>> Predicates { get; }
 
-        public TrackQueryProcessor()
+        public TrackQueryProcessor(Func<Track, bool> duplicateFunction)
         {
             this.Predicates = new Dictionary<string, Func<Track, string, bool>>()
             {
+                {"dup", (track, param) => duplicateFunction(track) },
                 { "q", QueryFullText },
                 {"Q", QueryExactText },
                 {"a", (track, param) => track.Artist.Contains(param, StringComparison.InvariantCultureIgnoreCase) },

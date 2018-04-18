@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Katatsuki.API
 {
-    public class TrackboxEventArgs
+    public class TrackEvent
     {
         public Track Track { get; }
-        public TrackboxEventArgs(Track track)
+        public TrackEvent(Track track)
         {
             this.Track = track;
         }

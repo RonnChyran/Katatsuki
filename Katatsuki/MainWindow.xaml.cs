@@ -32,16 +32,33 @@ namespace Katatsuki
         public MainWindow()
         {
             this.InitializeComponent();
-            this.context = new KatatsukiContext();
-            new LibraryListener(context);
-            this.queryProcessor = new TrackQueryProcessor();
+            this.context = new KatatsukiContext(File.ReadAllText("path"));
+
+            new LibraryManager(context);
+            this.queryProcessor = new TrackQueryProcessor(t =>
+            {
+                return (from track in this.context.Tracks
+                        where track.Artist == t.Artist && track.Title == t.Title && track.Album == t.Album
+                        group track by new { track.Title, track.Album, track.Artist } into dupes
+                        where dupes.Count() > 1
+                        select dupes).Any();
+            });
             this.viewSource = (CollectionViewSource)(this.FindResource("TracksViewSource"));
             this.DataContext = context;
             this.viewSource.Filter += TracksViewSource_Filter;
+            this.context.VisibilityStateChanged += Context_VisibilityStateChanged;
 
         }
 
-       
+        private void Context_VisibilityStateChanged(object sender, bool e)
+        {
+            if (e)
+            {
+                this.Visibility = Visibility.Visible;
+            }
+
+        }
+
         private void TracksViewSource_Filter(object sender, FilterEventArgs e)
         {
             e.Accepted = QueryFilter((Track)e.Item);
@@ -84,6 +101,35 @@ namespace Katatsuki
         {
             string path = Path.GetDirectoryName(((Track)this.dataGrid.SelectedItem)?.FilePath);
             if(path != null) Process.Start(path);
+        }
+
+        private void Window_StateChanged(object sender, EventArgs e)
+        {
+            if (this.WindowState == WindowState.Minimized)
+            {
+                this.Visibility = Visibility.Hidden;
+                this.WindowState = WindowState.Normal;
+            }
+        }
+        
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            this.Visibility = Visibility.Hidden;
+            e.Cancel = true;
+        }
+
+        private void CommandBinding_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+        private void CommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            
+            foreach(Track t in this.dataGrid.SelectedItems.Cast<Track>())
+            {
+                this.context.TrackLibrary.Refresh(t);
+            }
         }
     }
    

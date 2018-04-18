@@ -11,7 +11,7 @@ namespace Katatsuki.API
     {
         public DirectoryInfo TrackboxPath { get; }
         private static readonly string[] FileMasks = new string[] {".flac", ".mp3", ".m4a" };
-        public event EventHandler<TrackboxEventArgs> NewTrackFound;
+        public event EventHandler<TrackEvent> NewTrackFound;
         public event EventHandler<TrackboxCorruptedEventArgs> CorruptedTrackFound;
         private FileSystemWatcher watcher;
         const int FileCopyAttempts = 100;
@@ -46,7 +46,6 @@ namespace Katatsuki.API
             this.watcher.Created += OnTrackCreatedAsync;
         }
 
-
         private async void OnTrackCreatedAsync(object sender, FileSystemEventArgs e)
         {
            
@@ -72,7 +71,7 @@ namespace Katatsuki.API
                 try
                 {
                     this.NewTrackFound?.Invoke(this,
-                        new TrackboxEventArgs(new Track(path, this.GetCategory(path))));
+                        new TrackEvent(new Track(path, this.GetCategory(path))));
                 }catch(TagLib.CorruptFileException)
                 {
                     this.CorruptedTrackFound?.Invoke(this, new TrackboxCorruptedEventArgs(path));

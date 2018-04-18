@@ -8,8 +8,18 @@
         mc:Ignorable="d"
         Title="MainWindow" 
         ResizeMode="CanResize"
-        
+        StateChanged="Window_StateChanged"
+        Visibility="Hidden"
+        Closing="Window_Closing"
         >
+    <Window.CommandBindings>
+        <CommandBinding Command="Refresh" CanExecute="CommandBinding_CanExecute" Executed="CommandBinding_Executed" />
+    </Window.CommandBindings>
+
+    <Window.InputBindings>
+        <KeyBinding Command="Refresh" Key="R" Modifiers="Ctrl" />
+    </Window.InputBindings>
+
     <Window.Resources>
         <CollectionViewSource 
             x:Key="TracksViewSource" 
@@ -23,6 +33,7 @@
         </CollectionViewSource>
         <local:StringListConverter x:Key="StringListConverter"/>
         <local:EnumConverter x:Key="EnumConverter"/>
+       
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>

@@ -11,12 +11,12 @@ using System.Timers;
 
 namespace Katatsuki
 {
-    public class LibraryListener
+    public class LibraryManager
     {
         private KatatsukiContext context;
         private readonly NotifyIcon icon;
         private ConcurrentStack<Track> RecentTracks { get; }
-        public LibraryListener(KatatsukiContext context)
+        public LibraryManager(KatatsukiContext context)
         {
             this.icon = new NotifyIcon();
             this.RecentTracks = new ConcurrentStack<Track>();
@@ -25,6 +25,14 @@ namespace Katatsuki
             this.context.Watcher.CorruptedTrackFound += Watcher_CorruptedTrackFound;
             this.icon.Icon = new System.Drawing.Icon("test.ico");
             this.icon.Visible = true;
+            this.icon.DoubleClick += (s, e) => this.context.ForceVisible(true);
+            this.icon.ContextMenu = new ContextMenu()
+            {
+                MenuItems =
+                {
+                    {new MenuItem("Open Library", (s, e)  => this.context.ForceVisible(true)) } 
+                }
+            };
             var timer = new System.Timers.Timer(10000);
             timer.AutoReset = true;
             //todo use an autoreset event
@@ -34,6 +42,7 @@ namespace Katatsuki
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
+            Console.WriteLine("Elapsed");
             if (this.RecentTracks.IsEmpty) return;
             if (this.RecentTracks.Count > 1)
             {
@@ -69,7 +78,7 @@ namespace Katatsuki
             {
                 this.context.TrackLibrary.Add(t);
             }
-            catch
+            catch(IOException e)
             {
                 try
                 {
@@ -87,7 +96,7 @@ namespace Katatsuki
             this.MoveToNotAdded(e.Path);
         }
 
-        private void Watcher_NewTrackFound(object sender, TrackboxEventArgs e)
+        private void Watcher_NewTrackFound(object sender, TrackEvent e)
         {
             this.SortTrack(e.Track);
             this.RecentTracks.Push(e.Track);
